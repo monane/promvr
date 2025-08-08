@@ -28,6 +28,16 @@ namespace PromVR.Drawing
             InitDrawableTexture();
         }
 
+        private void OnEnable()
+        {
+            controlPanel.ClearRequested += Clear;
+        }
+
+        private void OnDisable()
+        {
+            controlPanel.ClearRequested -= Clear;
+        }
+
         private void InitDrawableTexture()
         {
             drawableTexture = new RenderTexture(
@@ -48,29 +58,11 @@ namespace PromVR.Drawing
             brushMaterial.SetTexture("_MainTex", drawableTexture);
         }
 
-        private void OnEnable()
-        {
-            controlPanel.ClearRequested += Clear;
-        }
-
-        private void OnDisable()
-        {
-            controlPanel.ClearRequested -= Clear;
-        }
-
         public void Clear()
         {
             segments.Clear();
             drawableTexture.FillWithWhite();
             OnCleared?.Invoke();
-        }
-
-        public DrawingBoardSnapshot CaptureSnapshot()
-        {
-            return new()
-            {
-                Segments = segments.ToArray()
-            };
         }
 
         public void ApplyState(DrawingBoardSnapshot boardState)
@@ -136,6 +128,14 @@ namespace PromVR.Drawing
 
                 activeBrushParams = brushParams;
             }
+        }
+
+        public DrawingBoardSnapshot CaptureSnapshot()
+        {
+            return new()
+            {
+                Segments = segments.ToArray()
+            };
         }
     }
 }
