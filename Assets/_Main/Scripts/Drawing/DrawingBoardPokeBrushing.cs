@@ -102,7 +102,7 @@ namespace PromVR.Drawing
             {
                 drawingBoard.DrawSegmentPoint(
                     pointerDrawingSession.SegmentIndex,
-                    pointerEvent.Pose.position
+                    pointerEvent.Pose
                 );
 
                 pointerDrawingSession.LastDrawedPosition = pointerPosition;

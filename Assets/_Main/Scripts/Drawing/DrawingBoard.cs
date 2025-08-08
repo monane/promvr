@@ -12,9 +12,14 @@ namespace PromVR.Drawing
         [SerializeField] private DrawingBoardControlPanel controlPanel;
         [SerializeField] private MeshRenderer boardMeshRenderer;
 
-        [Header("Drawing settings")]
-        [SerializeField] private Vector2Int drawableTextureResolution;
+        [Header("Drawing Settings")]
+        [SerializeField] private Vector2Int drawableTextureResolution = new(1536, 1536);
         [SerializeField] private Material brushMaterial;
+
+        [Header("Internal Raycasting Settings")]
+        [SerializeField] private LayerMask drawingBoardLayerMask;
+        [SerializeField] private float pointerPositionOffset = -0.01f;
+        [SerializeField] private float maxRayDistance = 0.75f;
 
         private readonly List<DrawingSegment> segments = new();
 
@@ -95,11 +100,30 @@ namespace PromVR.Drawing
             return segments.Count - 1;
         }
 
-        public void DrawSegmentPoint(int segmentIndex, Vector3 worldPosition)
+        public void DrawSegmentPoint(int segmentIndex, Pose pointerPose)
         {
-            Vector2 uvPosition = worldPosition;
+            if (TryGetBoardUVPositionByPointerPose(pointerPose, out var uvPosition))
+            {
+                DrawSegmentPoint(segmentIndex, uvPosition);
+            }
+        }
 
-            segments[segmentIndex].Points.Add(uvPosition);
+        private bool TryGetBoardUVPositionByPointerPose(Pose pointerPose, out Vector2 uvPosition)
+        {
+            // For some reason, pointerPose.forward points in the opposite direction.
+            var pointerDirection = -pointerPose.forward;             
+            var pointerPosition = pointerPose.position + pointerDirection * pointerPositionOffset;
+
+            var ray = new Ray(pointerPosition, pointerDirection);
+
+            if (Physics.Raycast(ray, out var rayHit, maxRayDistance, drawingBoardLayerMask))
+            {
+                uvPosition = rayHit.textureCoord;
+                return true;
+            }
+
+            uvPosition = default;
+            return false;
         }
 
         public void DrawSegmentPoint(int segmentIndex, Vector2 uvPosition)
@@ -108,8 +132,6 @@ namespace PromVR.Drawing
 
             ApplyBrushParams(segment.BrushParams);
 
-            segment.Points.Add(uvPosition);
-
             brushMaterial.SetVector(
                 "_UVPosition",
                 new Vector4(uvPosition.x, uvPosition.y, 0, 0)
@@ -117,6 +139,8 @@ namespace PromVR.Drawing
 
             Graphics.Blit(drawableTexture, drawableTextureBuffer, brushMaterial);
             Graphics.Blit(drawableTextureBuffer, drawableTexture);
+
+            segment.Points.Add(uvPosition);
         }
 
         private void ApplyBrushParams(BrushParams brushParams)
