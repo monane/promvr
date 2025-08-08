@@ -1,7 +1,7 @@
 namespace PromVR.Drawing
 {
     [System.Serializable]
-    public struct DrawingPlaneState
+    public struct DrawingBoardSnapshot
     {
         public DrawingSegment[] Segments;
     }

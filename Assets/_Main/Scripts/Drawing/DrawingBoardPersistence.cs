@@ -3,10 +3,10 @@ using PromVR.Utils;
 
 namespace PromVR.Drawing
 {
-    public class DrawingPlanePersistence : MonoBehaviour
+    public class DrawingBoardPersistence : MonoBehaviour
     {
-        [SerializeField] private DrawingPlane drawingPlane;
-        [SerializeField] private DrawingPlaneControlPanel controlPanel;
+        [SerializeField] private DrawingBoard drawingBoard;
+        [SerializeField] private DrawingBoardControlPanel controlPanel;
 
         private void OnEnable()
         {
@@ -22,16 +22,16 @@ namespace PromVR.Drawing
 
         private void SaveState()
         {
-            var currentState = drawingPlane.CaptureState();
-            JsonStorage.TrySave(currentState, nameof(DrawingPlaneState));
+            var snapshot = drawingBoard.CaptureSnapshot();
+            JsonStorage.TrySave(snapshot, nameof(DrawingBoardSnapshot));
         }
 
         private void TryLoadState()
         {
-            if (JsonStorage.TryLoad(nameof(DrawingPlaneState), out DrawingPlaneState loadedState))
+            if (JsonStorage.TryLoad(nameof(DrawingBoardSnapshot), out DrawingBoardSnapshot snapshot))
             {
-                drawingPlane.Clear();
-                drawingPlane.ApplyState(loadedState);
+                drawingBoard.Clear();
+                drawingBoard.ApplyState(snapshot);
             }
         }
     }

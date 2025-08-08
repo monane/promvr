@@ -4,9 +4,9 @@ using UnityEngine;
 namespace PromVR.Drawing
 {
     [System.Serializable]
-    public struct DrawingSegment
+    public class DrawingSegment
     {
-        public Color Color;
+        public BrushParams BrushParams;
         public List<Vector2> Points;
     }
 }

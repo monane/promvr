@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace PromVR.Drawing
 {
-    public class DrawingPlaneControlPanel : MonoBehaviour
+    public class DrawingBoardControlPanel : MonoBehaviour
     {
         public event Action ColorChangeRequested;
         public event Action SaveRequested;
@@ -15,6 +15,7 @@ namespace PromVR.Drawing
         [SerializeField] private Button saveButton;
         [SerializeField] private Button loadButton;
         [SerializeField] private Button clearButton;
+        [SerializeField] private Image colorPreview;
 
         private void Awake()
         {
@@ -22,6 +23,11 @@ namespace PromVR.Drawing
             loadButton.onClick.AddListener(() => LoadRequested?.Invoke());
             clearButton.onClick.AddListener(() => ClearRequested?.Invoke());
             colorButton.onClick.AddListener(() => ColorChangeRequested?.Invoke());
+        }
+
+        public void SetColorPreview(Color color)
+        {
+            colorPreview.color = color;
         }
     }
 }
