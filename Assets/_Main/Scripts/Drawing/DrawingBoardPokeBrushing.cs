@@ -37,15 +37,23 @@ namespace PromVR.Drawing
 
         private void OnEnable()
         {
+            drawingBoard.OnCleared += OnDrawingBoardCleared;
             controlPanel.ColorChangeRequested += OnColorChangeRequested;
             boardPokeInteractable.WhenPointerEventRaised += HandlePointerEvent;
+
             controlPanel.SetColorPreview(ActiveColor);
         }
 
         private void OnDisable()
         {
+            drawingBoard.OnCleared -= OnDrawingBoardCleared;
             controlPanel.ColorChangeRequested -= OnColorChangeRequested;
             boardPokeInteractable.WhenPointerEventRaised -= HandlePointerEvent;
+        }
+
+        private void OnDrawingBoardCleared()
+        {
+            activePointerSessions.Clear();
         }
 
         private void OnColorChangeRequested()

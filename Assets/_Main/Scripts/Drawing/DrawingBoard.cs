@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
-using PromVR.Utils;
 using UnityEngine;
+using PromVR.Utils;
 
 namespace PromVR.Drawing
 {
     public class DrawingBoard : MonoBehaviour
     {
+        public event Action OnCleared;
+
         [SerializeField] private DrawingBoardControlPanel controlPanel;
         [SerializeField] private MeshRenderer boardMeshRenderer;
 
@@ -59,6 +62,7 @@ namespace PromVR.Drawing
         {
             segments.Clear();
             drawableTexture.FillWithWhite();
+            OnCleared?.Invoke();
         }
 
         public DrawingBoardSnapshot CaptureSnapshot()
