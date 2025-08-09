@@ -17,6 +17,7 @@
  - [DrawingBoardPersistence.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPersistence.cs) - отвечает за сохранение и загрузку состояния для **DrawingBoard**.
  - [DrawingBoardPokeBrushing.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs) - отвечает за отрисовку **DrawingSegment**'ов на **DrawingBoard** [в ответ на ввод пальцами](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L78C9-L105C10).
  - [DrawingBoardControlPanel.cs](Assets/_Main/Scripts/Drawing/DrawingBoardControlPanel.cs) - "Панель управления для доски рисования", здесь все кнопки и связанные с ними эвенты.
+ - [ProtectDrawingBoardWhenLoading.cs](Assets/_Main/Scripts/Drawing/ProtectDrawingBoardWhenLoading.cs) - вспомогательный класс, который защишает **DrawingBoard** от изменений во время активной загрузки данных в **DrawingBoardPersistence**.
  - [JsonStorage.cs](Assets/_Main/Scripts/Utils/JsonStorage.cs) - утилитарный класс, способствует простому асинхронному сохранению и загрузке [сериализуемых объектов](https://docs.unity3d.com/6000.0/Documentation/Manual/json-serialization.html).
 ---
 Возможности расширения:
