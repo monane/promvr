@@ -7,7 +7,7 @@ namespace PromVR.Drawing
 {
     public class DrawingBoard : MonoBehaviour
     {
-        public event Action OnCleared;
+        public event Action Cleared;
 
         [SerializeField] private DrawingBoardControlPanel controlPanel;
         [SerializeField] private MeshRenderer boardMeshRenderer;
@@ -15,6 +15,8 @@ namespace PromVR.Drawing
         [Header("Drawing Settings")]
         [SerializeField] private Vector2Int drawableTextureResolution = new(1536, 1536);
         [SerializeField] private Material brushMaterial;
+        [SerializeField] private Material brushBatchedMaterial;
+        [SerializeField, Min(1)] private int maxBatchSize = 128;
 
         [Header("Internal Raycasting Settings")]
         [SerializeField] private LayerMask drawingBoardLayerMask;
@@ -25,7 +27,6 @@ namespace PromVR.Drawing
 
         private RenderTexture drawableTexture;
         private RenderTexture drawableTextureBuffer;
-
         private BrushParams? activeBrushParams;
 
         private void Awake()
@@ -61,31 +62,73 @@ namespace PromVR.Drawing
             boardMeshRenderer.material.mainTexture = drawableTexture;
 
             brushMaterial.SetTexture("_MainTex", drawableTexture);
+            brushBatchedMaterial.SetTexture("_MainTex", drawableTexture);
         }
 
         public void Clear()
         {
             segments.Clear();
             drawableTexture.FillWithWhite();
-            OnCleared?.Invoke();
+            Cleared?.Invoke();
         }
 
-        public void ApplyState(DrawingBoardSnapshot boardState)
+        public void ApplySnapshot(DrawingBoardSnapshot snapshot)
         {
-            foreach (var segment in boardState.Segments)
+            foreach (var segment in snapshot.Segments)
             {
                 if (segment.Points.Count == 0)
                     continue;
 
-                var index = InitNewSegment(segment.BrushParams);
-
-                foreach (var point in segment.Points)
-                {
-                    DrawSegmentPoint(index, point);
-                }
+                DrawExistingSegment(segment);
 
                 segments.Add(segment);
             }
+        }
+
+        private void DrawExistingSegment(DrawingSegment segment)
+        {
+            ApplyBrushParams(segment.BrushParams);
+
+            int totalPoints = segment.Points.Count;
+
+            for (int start = 0; start < totalPoints; start += maxBatchSize)
+            {
+                int batchSize = Mathf.Min(maxBatchSize, totalPoints - start);
+
+                var batchPositions = new Vector4[maxBatchSize];
+                for (int i = 0; i < batchSize; i++)
+                {
+                    batchPositions[i] = segment.Points[start + i];
+                }
+
+                brushBatchedMaterial.SetInt("_PointCount", batchSize);
+                brushBatchedMaterial.SetVectorArray("_UVPositions", batchPositions);
+
+                DrawWithBrush(brushBatchedMaterial);
+            }
+        }
+
+        private void ApplyBrushParams(BrushParams brushParams)
+        {
+            var brushSizeParam = "_BrushSize";
+            var brushColorParam = "_BrushColor";
+
+            if (!activeBrushParams.Equals(brushParams))
+            {
+                brushMaterial.SetFloat(brushSizeParam, brushParams.Radius);
+                brushMaterial.SetColor(brushColorParam, brushParams.Color);
+
+                brushBatchedMaterial.SetFloat(brushSizeParam, brushParams.Radius);
+                brushBatchedMaterial.SetColor(brushColorParam, brushParams.Color);
+
+                activeBrushParams = brushParams;
+            }
+        }
+
+        private void DrawWithBrush(Material brushMaterial)
+        {
+            Graphics.Blit(drawableTexture, drawableTextureBuffer, brushMaterial);
+            Graphics.Blit(drawableTextureBuffer, drawableTexture);
         }
 
         /// <returns>Index for created <c>DrawingSegment</c> item</returns>
@@ -111,7 +154,7 @@ namespace PromVR.Drawing
         private bool TryGetBoardUVPositionByPointerPose(Pose pointerPose, out Vector2 uvPosition)
         {
             // For some reason, pointerPose.forward points in the opposite direction.
-            var pointerDirection = -pointerPose.forward;             
+            var pointerDirection = -pointerPose.forward;
             var pointerPosition = pointerPose.position + pointerDirection * pointerPositionOffset;
 
             var ray = new Ray(pointerPosition, pointerDirection);
@@ -126,7 +169,7 @@ namespace PromVR.Drawing
             return false;
         }
 
-        public void DrawSegmentPoint(int segmentIndex, Vector2 uvPosition)
+        private void DrawSegmentPoint(int segmentIndex, Vector2 uvPosition)
         {
             var segment = segments[segmentIndex];
 
@@ -137,21 +180,9 @@ namespace PromVR.Drawing
                 new Vector4(uvPosition.x, uvPosition.y, 0, 0)
             );
 
-            Graphics.Blit(drawableTexture, drawableTextureBuffer, brushMaterial);
-            Graphics.Blit(drawableTextureBuffer, drawableTexture);
+            DrawWithBrush(brushMaterial);
 
             segment.Points.Add(uvPosition);
-        }
-
-        private void ApplyBrushParams(BrushParams brushParams)
-        {
-            if (!activeBrushParams.Equals(brushParams))
-            {
-                brushMaterial.SetFloat("_BrushSize", brushParams.Radius);
-                brushMaterial.SetColor("_BrushColor", brushParams.Color);
-
-                activeBrushParams = brushParams;
-            }
         }
 
         public DrawingBoardSnapshot CaptureSnapshot()

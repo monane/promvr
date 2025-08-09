@@ -6,11 +6,11 @@ namespace PromVR.Drawing
 {
     // This class is responsible for drawing segments on DrawingBoard
     // by processing pointer events of Poke Interaction.
-    [RequireComponent(typeof(PokeInteractable))]
     public class DrawingBoardPokeBrushing : MonoBehaviour
     {
         [SerializeField] private DrawingBoard drawingBoard;
         [SerializeField] private DrawingBoardControlPanel controlPanel;
+        [SerializeField] private PokeInteractable boardPokeInteractable;
         [SerializeField] private float pointerDistanceThreshold = 0.01f;
 
         [Header("Brush settings")]
@@ -26,18 +26,11 @@ namespace PromVR.Drawing
             Color = ActiveColor
         };
 
-        private PokeInteractable boardPokeInteractable;
-
         private readonly Dictionary<int, PointerDrawingSession> activePointerSessions = new();
-
-        private void Awake()
-        {
-            boardPokeInteractable = GetComponent<PokeInteractable>();
-        }
 
         private void OnEnable()
         {
-            drawingBoard.OnCleared += OnDrawingBoardCleared;
+            drawingBoard.Cleared += OnDrawingBoardCleared;
             controlPanel.ColorChangeRequested += OnColorChangeRequested;
             boardPokeInteractable.WhenPointerEventRaised += HandlePointerEvent;
 
@@ -46,9 +39,11 @@ namespace PromVR.Drawing
 
         private void OnDisable()
         {
-            drawingBoard.OnCleared -= OnDrawingBoardCleared;
+            drawingBoard.Cleared -= OnDrawingBoardCleared;
             controlPanel.ColorChangeRequested -= OnColorChangeRequested;
             boardPokeInteractable.WhenPointerEventRaised -= HandlePointerEvent;
+
+            activePointerSessions.Clear();
         }
 
         private void OnDrawingBoardCleared()

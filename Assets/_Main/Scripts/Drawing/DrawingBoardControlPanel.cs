@@ -19,15 +19,23 @@ namespace PromVR.Drawing
 
         private void Awake()
         {
+            colorButton.onClick.AddListener(() => ColorChangeRequested?.Invoke());
             saveButton.onClick.AddListener(() => SaveRequested?.Invoke());
             loadButton.onClick.AddListener(() => LoadRequested?.Invoke());
             clearButton.onClick.AddListener(() => ClearRequested?.Invoke());
-            colorButton.onClick.AddListener(() => ColorChangeRequested?.Invoke());
         }
 
         public void SetColorPreview(Color color)
         {
             colorPreview.color = color;
+        }
+
+        public void SetInteractionsEnabled(bool enabled)
+        {
+            colorButton.interactable = enabled;
+            saveButton.interactable = enabled;
+            loadButton.interactable = enabled;
+            clearButton.interactable = enabled;
         }
     }
 }

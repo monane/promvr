@@ -1,38 +1,61 @@
+using System;
 using UnityEngine;
 using PromVR.Utils;
+using Cysharp.Threading.Tasks;
 
 namespace PromVR.Drawing
 {
     public class DrawingBoardPersistence : MonoBehaviour
     {
+        public event Action BeginLoading;
+        public event Action DoneLoading;
+
         [SerializeField] private DrawingBoard drawingBoard;
         [SerializeField] private DrawingBoardControlPanel controlPanel;
+        [SerializeField] private string snapshotFileName = "snapshot";
+
+        private bool isLoading;
 
         private void OnEnable()
         {
             controlPanel.SaveRequested += SaveState;
-            controlPanel.LoadRequested += TryLoadState;
+            controlPanel.LoadRequested += OnLoadRequested;
         }
 
         private void OnDisable()
         {
             controlPanel.SaveRequested -= SaveState;
-            controlPanel.LoadRequested -= TryLoadState;
+            controlPanel.LoadRequested -= OnLoadRequested;
         }
 
         private void SaveState()
         {
             var snapshot = drawingBoard.CaptureSnapshot();
-            JsonStorage.TrySave(snapshot, nameof(DrawingBoardSnapshot));
+            JsonStorage.SaveAsync(snapshot, snapshotFileName).Forget();
         }
 
-        private void TryLoadState()
+        private void OnLoadRequested()
         {
-            if (JsonStorage.TryLoad(nameof(DrawingBoardSnapshot), out DrawingBoardSnapshot snapshot))
+            if (isLoading)
             {
-                drawingBoard.Clear();
-                drawingBoard.ApplyState(snapshot);
+                Debug.LogError("Already loading DrawingBoardSnapshot!", this);
+                return;
             }
+
+            isLoading = true;
+            BeginLoading?.Invoke();
+
+            JsonStorage.LoadAsync<DrawingBoardSnapshot>(snapshotFileName).ContinueWith(snapshot =>
+            {
+                if (snapshot?.Segments?.Length > 0)
+                {
+                    drawingBoard.Clear();
+                    drawingBoard.ApplySnapshot(snapshot);
+                }
+
+                isLoading = false;
+                DoneLoading?.Invoke();
+            });
         }
     }
 }
