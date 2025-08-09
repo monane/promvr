@@ -32,4 +32,6 @@
 - [Видео демонстрация](https://disk.yandex.ru/i/Tqvfj71aTl9BAg)
 - [APK-файл](https://disk.yandex.ru/d/kBvbclD3YlOE4Q)
 
+Тестировалось на устройстве Oculus Quest 2 с версией ОС v78.0
+
 Автор: Кирилл Патрин
