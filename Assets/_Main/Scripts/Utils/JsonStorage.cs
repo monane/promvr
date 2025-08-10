@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using UnityEngine;
-using Cysharp.Threading.Tasks;
 
 namespace PromVR.Utils
 {
@@ -23,7 +22,7 @@ namespace PromVR.Utils
         /// <summary>
         /// Type of <c>T</c> must be Serializable
         /// </summary>
-        public static async UniTask<T> LoadAsync<T>(string fileName)
+        public static async Awaitable<T> LoadAsync<T>(string fileName)
         {
             T output = default;
 
@@ -31,7 +30,7 @@ namespace PromVR.Utils
 
             if (File.Exists(filePath))
             {
-                await UniTask.SwitchToThreadPool();
+                await Awaitable.BackgroundThreadAsync();
 
                 try
                 {
@@ -45,10 +44,6 @@ namespace PromVR.Utils
                         + $" from file '{filePath}'.\nError: {e.Message}"
                     );
                 }
-                finally
-                {
-                    await UniTask.SwitchToMainThread();
-                }
             }
 
             return output;
@@ -57,9 +52,9 @@ namespace PromVR.Utils
         /// <summary>
         /// Type of <c>T</c> must be Serializable
         /// </summary>
-        public static async UniTaskVoid SaveAsync<T>(T data, string fileName)
+        public static async Awaitable SaveAsync<T>(T data, string fileName)
         {
-            await UniTask.SwitchToThreadPool();
+            await Awaitable.BackgroundThreadAsync();
 
             var json = JsonUtility.ToJson(data);
             var filePath = GetFilePath(fileName);
@@ -74,10 +69,6 @@ namespace PromVR.Utils
                     $"Failed to save instance of '{typeof(T)}'"
                     + $" to file '{filePath}'.\nError: {e.Message}"
                 );
-            }
-            finally
-            {
-                await UniTask.SwitchToMainThread();
             }
         }
 

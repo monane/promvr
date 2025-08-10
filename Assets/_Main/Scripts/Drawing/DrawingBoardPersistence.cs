@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using PromVR.Utils;
-using Cysharp.Threading.Tasks;
 
 namespace PromVR.Drawing
 {
@@ -31,7 +30,7 @@ namespace PromVR.Drawing
         private void SaveState()
         {
             var snapshot = drawingBoard.CaptureSnapshot();
-            JsonStorage.SaveAsync(snapshot, snapshotFileName).Forget();
+            JsonStorage.SaveAsync(snapshot, snapshotFileName);
         }
 
         private void OnLoadRequested()
@@ -45,17 +44,21 @@ namespace PromVR.Drawing
             isLoading = true;
             BeginLoading?.Invoke();
 
-            JsonStorage.LoadAsync<DrawingBoardSnapshot>(snapshotFileName).ContinueWith(snapshot =>
-            {
-                if (snapshot?.Segments?.Length > 0)
-                {
-                    drawingBoard.Clear();
-                    drawingBoard.ApplySnapshot(snapshot);
-                }
+            TryLoadAsync();
+        }
 
-                isLoading = false;
-                DoneLoading?.Invoke();
-            });
+        private async Awaitable TryLoadAsync()
+        {
+            var snapshot = await JsonStorage.LoadAsync<DrawingBoardSnapshot>(snapshotFileName);
+
+            if (snapshot?.Segments?.Length > 0)
+            {
+                drawingBoard.Clear();
+                await drawingBoard.ApplySnapshotAsync(snapshot);
+            }
+
+            isLoading = false;
+            DoneLoading?.Invoke();
         }
     }
 }
