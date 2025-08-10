@@ -343,6 +343,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4766736760683615045}
+  - component: {fileID: 4273758832696906339}
   - component: {fileID: 4398307684084923384}
   - component: {fileID: 7375814329350820472}
   - component: {fileID: 3757913670239041685}
@@ -372,6 +373,22 @@ Transform:
   - {fileID: 565282412483942700}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4273758832696906339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6412967843630780263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07f08d268fec7fb4ca7727ce1d61312b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawableTextureResolution: {x: 1536, y: 1536}
+  brushMaterial: {fileID: 2100000, guid: 87d05a37541716e458bb22ea8efaa024, type: 2}
+  brushBatchedMaterial: {fileID: 2100000, guid: b6597a35364610848b4c4155095610dd, type: 2}
+  maxBatchSize: 64
 --- !u!114 &4398307684084923384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,10 +403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controlPanel: {fileID: 7336980288305500367}
   boardMeshRenderer: {fileID: 3959117621588458778}
-  drawableTextureResolution: {x: 1536, y: 1536}
-  brushMaterial: {fileID: 2100000, guid: 87d05a37541716e458bb22ea8efaa024, type: 2}
-  brushBatchedMaterial: {fileID: 2100000, guid: b6597a35364610848b4c4155095610dd, type: 2}
-  maxBatchSize: 256
+  renderTextureDrawing: {fileID: 4273758832696906339}
   drawingBoardLayerMask:
     serializedVersion: 2
     m_Bits: 64

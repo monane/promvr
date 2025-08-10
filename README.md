@@ -2,7 +2,6 @@
  - Unity 6000.0.55f1
  - Meta XR Core SDK
  - Meta XR Interaction SDK
- - [UniTask](https://github.com/Cysharp/UniTask)
 ---
 Ключевые скрипты расположены внутри директории [Assets/_Main/Scripts/](Assets/_Main/Scripts/)
 
@@ -13,7 +12,8 @@
  - [PointerDrawingSession.cs](Assets/_Main/Scripts/Drawing/PointerDrawingSession.cs) - вспомогательные данные [для отслеживания активной сессии рисования сегмента пальцем](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L83C13-L92C14).
 
 Логика:
- - [DrawingBoard.cs](Assets/_Main/Scripts/Drawing/DrawingBoard.cs) - "Доска для рисования", главный объект отвечающий за [конечную отрисовку DrawingSegment'ов](Assets/_Main/Scripts/Drawing/DrawingBoard.cs#L172C9-L186C10).
+ - [RenderTextureDrawing.cs](Assets/_Main/Scripts/Drawing/RenderTextureDrawing.cs) - отвечает за рисование на RenderTexture с помощью шейдеров.
+ - [DrawingBoard.cs](Assets/_Main/Scripts/Drawing/DrawingBoard.cs) - "Доска для рисования", главный объект отвечающий за [конечную отрисовку DrawingSegment'ов с помощью RenderTextureDrawing](Assets/_Main/Scripts/Drawing/DrawingBoard.cs#L105).
  - [DrawingBoardPersistence.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPersistence.cs) - отвечает за сохранение и загрузку состояния для **DrawingBoard**.
  - [DrawingBoardPokeBrushing.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs) - отвечает за отрисовку **DrawingSegment**'ов на **DrawingBoard** [в ответ на ввод пальцами](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L78C9-L105C10).
  - [DrawingBoardControlPanel.cs](Assets/_Main/Scripts/Drawing/DrawingBoardControlPanel.cs) - "Панель управления для доски рисования", здесь все кнопки и связанные с ними эвенты.
@@ -26,12 +26,12 @@
  - За счёт использования Meta XR Interaction SDK можно с минимальными усилиями [прикрутить](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L35) рисование с помощью другого метода ввода (например классический лазер из контроллера)
 
 Производительность:
-- Во время рисования в сцену не добавляются никакие новые объекты, потому что [логика рисования реализована через шейдер](Assets/_Main/Scripts/Drawing/DrawingBoard.cs#L172C9-L186C10) - это значит, что вся тяжелая логика связанная с отрисовкой выполняется на стороне GPU. За счёт этого достигается хорошая производительность.
+- Во время рисования в сцену не добавляются никакие новые объекты, потому что [логика рисования реализована через шейдер](Assets/_Main/Scripts/Drawing/RenderTextureDrawing.cs#L66C13-L67C67) - это значит, что вся тяжелая логика связанная с отрисовкой выполняется на стороне GPU. За счёт этого достигается хорошая производительность.
 - Также, рисование новых точек осуществляется [только если палец сдвинулся от последней нарисованной точки на минимальный порог (threshold)](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L96). Значение порога настраивается через инспектор. Это позволяет гарантировать, что во время держания пальца в одном месте, не будет происходить лишних отрисовок.
 ---
 Ссылки:
 - [Видео демонстрация](https://disk.yandex.ru/i/Tqvfj71aTl9BAg) - на записи не видно режима **pass-through**, но он включён.
-- [APK-файл](https://disk.yandex.ru/d/kBvbclD3YlOE4Q)
+- [APK-файл](https://disk.yandex.ru/d/kbnVr4azZYC0sA)
 
 Тестировалось на устройстве Oculus Quest 2 с версией ОС v78.0
 
