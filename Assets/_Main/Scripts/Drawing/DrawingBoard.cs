@@ -11,12 +11,7 @@ namespace PromVR.Drawing
 
         [SerializeField] private DrawingBoardControlPanel controlPanel;
         [SerializeField] private MeshRenderer boardMeshRenderer;
-
-        [Header("Drawing Settings")]
-        [SerializeField] private Vector2Int drawableTextureResolution = new(1536, 1536);
-        [SerializeField] private Material brushMaterial;
-        [SerializeField] private Material brushBatchedMaterial;
-        [SerializeField, Min(1)] private int maxBatchSize = 128;
+        [SerializeField] private RenderTextureDrawing renderTextureDrawing;
 
         [Header("Internal Raycasting Settings")]
         [SerializeField] private LayerMask drawingBoardLayerMask;
@@ -24,15 +19,6 @@ namespace PromVR.Drawing
         [SerializeField] private float maxRayDistance = 0.75f;
 
         private readonly List<DrawingSegment> segments = new();
-
-        private RenderTexture drawableTexture;
-        private RenderTexture drawableTextureBuffer;
-        private BrushParams? activeBrushParams;
-
-        private void Awake()
-        {
-            InitDrawableTexture();
-        }
 
         private void OnEnable()
         {
@@ -44,91 +30,34 @@ namespace PromVR.Drawing
             controlPanel.ClearRequested -= Clear;
         }
 
-        private void InitDrawableTexture()
+        private void Start()
         {
-            drawableTexture = new RenderTexture(
-                drawableTextureResolution.x,
-                drawableTextureResolution.y,
-                0,
-                RenderTextureFormat.ARGB32
-            );
-
-            drawableTexture.Create();
-            drawableTexture.FillWithWhite();
-
-            drawableTextureBuffer = new RenderTexture(drawableTexture);
-            drawableTextureBuffer.Create();
-
-            boardMeshRenderer.material.mainTexture = drawableTexture;
-
-            brushMaterial.SetTexture("_MainTex", drawableTexture);
-            brushBatchedMaterial.SetTexture("_MainTex", drawableTexture);
+            boardMeshRenderer.material.mainTexture = renderTextureDrawing.DrawableTexture;
         }
 
         public void Clear()
         {
+            foreach (var segment in segments)
+            {
+                PointsListPool.Release(segment.Points);
+            }
+
             segments.Clear();
-            drawableTexture.FillWithWhite();
+            renderTextureDrawing.Clear();
             Cleared?.Invoke();
         }
 
-        public void ApplySnapshot(DrawingBoardSnapshot snapshot)
+        public async Awaitable ApplySnapshotAsync(DrawingBoardSnapshot snapshot)
         {
             foreach (var segment in snapshot.Segments)
             {
                 if (segment.Points.Count == 0)
                     continue;
 
-                DrawExistingSegment(segment);
+                await renderTextureDrawing.Draw(segment.Points, segment.BrushParams);
 
                 segments.Add(segment);
             }
-        }
-
-        private void DrawExistingSegment(DrawingSegment segment)
-        {
-            ApplyBrushParams(segment.BrushParams);
-
-            int totalPoints = segment.Points.Count;
-
-            for (int start = 0; start < totalPoints; start += maxBatchSize)
-            {
-                int batchSize = Mathf.Min(maxBatchSize, totalPoints - start);
-
-                var batchPositions = new Vector4[maxBatchSize];
-                for (int i = 0; i < batchSize; i++)
-                {
-                    batchPositions[i] = segment.Points[start + i];
-                }
-
-                brushBatchedMaterial.SetInt("_PointCount", batchSize);
-                brushBatchedMaterial.SetVectorArray("_UVPositions", batchPositions);
-
-                DrawWithBrush(brushBatchedMaterial);
-            }
-        }
-
-        private void ApplyBrushParams(BrushParams brushParams)
-        {
-            var brushSizeParam = "_BrushSize";
-            var brushColorParam = "_BrushColor";
-
-            if (!activeBrushParams.Equals(brushParams))
-            {
-                brushMaterial.SetFloat(brushSizeParam, brushParams.Radius);
-                brushMaterial.SetColor(brushColorParam, brushParams.Color);
-
-                brushBatchedMaterial.SetFloat(brushSizeParam, brushParams.Radius);
-                brushBatchedMaterial.SetColor(brushColorParam, brushParams.Color);
-
-                activeBrushParams = brushParams;
-            }
-        }
-
-        private void DrawWithBrush(Material brushMaterial)
-        {
-            Graphics.Blit(drawableTexture, drawableTextureBuffer, brushMaterial);
-            Graphics.Blit(drawableTextureBuffer, drawableTexture);
         }
 
         /// <returns>Index for created <c>DrawingSegment</c> item</returns>
@@ -137,7 +66,7 @@ namespace PromVR.Drawing
             segments.Add(new DrawingSegment
             {
                 BrushParams = brushParams,
-                Points = new List<Vector2>(capacity: 200)
+                Points = PointsListPool.Get()
             });
 
             return segments.Count - 1;
@@ -173,14 +102,7 @@ namespace PromVR.Drawing
         {
             var segment = segments[segmentIndex];
 
-            ApplyBrushParams(segment.BrushParams);
-
-            brushMaterial.SetVector(
-                "_UVPosition",
-                new Vector4(uvPosition.x, uvPosition.y, 0, 0)
-            );
-
-            DrawWithBrush(brushMaterial);
+            renderTextureDrawing.Draw(uvPosition, segment.BrushParams);
 
             segment.Points.Add(uvPosition);
         }
