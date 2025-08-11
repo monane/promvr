@@ -2,8 +2,9 @@ using System;
 using UnityEngine;
 using Newtonsoft.Json;
 using PromVR.Utils;
+using PromVR.Drawing.Segments;
 
-namespace PromVR.Drawing
+namespace PromVR.Drawing.Board
 {
     public class DrawingBoardPersistence : MonoBehaviour
     {
