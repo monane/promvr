@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Newtonsoft.Json;
 using PromVR.Utils;
 
 namespace PromVR.Drawing
@@ -13,7 +14,14 @@ namespace PromVR.Drawing
         [SerializeField] private DrawingBoardControlPanel controlPanel;
         [SerializeField] private string snapshotFileName = "snapshot";
 
+        private JsonSerializerSettings jsonSerializerSettings;
+
         private bool isLoading;
+
+        private void Awake()
+        {
+            InitJsonSerializerSettings();
+        }
 
         private void OnEnable()
         {
@@ -25,6 +33,12 @@ namespace PromVR.Drawing
         {
             controlPanel.SaveRequested -= SaveState;
             controlPanel.LoadRequested -= OnLoadRequested;
+        }
+
+        private void InitJsonSerializerSettings()
+        {
+            jsonSerializerSettings = new JsonSerializerSettings();
+            jsonSerializerSettings.Converters.Add(new DrawingSegmentJsonCreationConverter());
         }
 
         private void SaveState()
@@ -49,7 +63,10 @@ namespace PromVR.Drawing
 
         private async Awaitable TryLoadAsync()
         {
-            var snapshot = await JsonStorage.LoadAsync<DrawingBoardSnapshot>(snapshotFileName);
+            var snapshot = await JsonStorage.LoadAsync<DrawingBoardSnapshot>(
+                snapshotFileName,
+                jsonSerializerSettings
+            );
 
             if (snapshot?.Segments?.Length > 0)
             {

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace PromVR.Utils
 {
@@ -22,7 +23,7 @@ namespace PromVR.Utils
         /// <summary>
         /// Type of <c>T</c> must be Serializable
         /// </summary>
-        public static async Awaitable<T> LoadAsync<T>(string fileName)
+        public static async Awaitable<T> LoadAsync<T>(string fileName, JsonSerializerSettings serializerSettings = null)
         {
             T output = default;
 
@@ -35,10 +36,12 @@ namespace PromVR.Utils
                 try
                 {
                     var json = await File.ReadAllTextAsync(filePath);
-                    output = JsonUtility.FromJson<T>(json);
+                    output = JsonConvert.DeserializeObject<T>(json, serializerSettings);
                 }
                 catch (Exception e)
                 {
+                    await Awaitable.MainThreadAsync();
+
                     Debug.LogError(
                         $"Failed to load instance of '{typeof(T)}'"
                         + $" from file '{filePath}'.\nError: {e.Message}"
@@ -52,19 +55,21 @@ namespace PromVR.Utils
         /// <summary>
         /// Type of <c>T</c> must be Serializable
         /// </summary>
-        public static async Awaitable SaveAsync<T>(T data, string fileName)
+        public static async Awaitable SaveAsync<T>(T data, string fileName, JsonSerializerSettings serializerSettings = null)
         {
             await Awaitable.BackgroundThreadAsync();
 
-            var json = JsonUtility.ToJson(data);
+            var json = JsonConvert.SerializeObject(data, serializerSettings);
             var filePath = GetFilePath(fileName);
 
             try
             {
-                File.WriteAllText(filePath, json);
+                await File.WriteAllTextAsync(filePath, json);
             }
             catch (Exception e)
             {
+                await Awaitable.MainThreadAsync();
+
                 Debug.LogError(
                     $"Failed to save instance of '{typeof(T)}'"
                     + $" to file '{filePath}'.\nError: {e.Message}"
