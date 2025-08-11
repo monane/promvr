@@ -12,6 +12,7 @@ Shader "Custom/URPBrushBatched"
     SubShader
     {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+
         Pass
         {
             Name "BrushPass"
@@ -31,20 +32,20 @@ Shader "Custom/URPBrushBatched"
 
             struct Attributes
             {
-                float4 positionOS   : POSITION;
-                float2 uv           : TEXCOORD0;
+                float4 positionOS : POSITION;
+                float2 uv         : TEXCOORD0;
             };
 
             struct Varyings
             {
-                float4 positionHCS  : SV_POSITION;
-                float2 uv           : TEXCOORD0;
+                float4 positionHCS : SV_POSITION;
+                float2 uv          : TEXCOORD0;
             };
 
             sampler2D _MainTex;
             sampler2D _BrushTex;
             half4 _BrushColor;
-            float _BrushSize;
+            half _BrushSize;
             int _PointCount;
             float4 _UVPositions[MAX_POINTS];
 
@@ -60,18 +61,25 @@ Shader "Custom/URPBrushBatched"
             {
                 half4 col = tex2D(_MainTex, IN.uv);
 
+                // Loop over brush points in this batch
+                [loop]
                 for (int i = 0; i < _PointCount; i++)
                 {
-                    float2 diff = IN.uv - _UVPositions[i].xy;
-                    float2 brushUV = diff / (_BrushSize + 1.0e-6) + 0.5;
+                    half2 diff = IN.uv - _UVPositions[i].xy;
+                    half2 brushUV = diff / (_BrushSize + 1.0e-6h) + 0.5h;
 
-                    half2 inBounds = step(half2(0,0), brushUV) * step(brushUV, half2(1,1));
-                    half mask = inBounds.x * inBounds.y;
+                    // Fast in-bounds check — avoids sampling brush if outside
+                    if (brushUV.x < 0.0h || brushUV.x > 1.0h ||
+                        brushUV.y < 0.0h || brushUV.y > 1.0h)
+                        continue;
 
-                    half4 brushSample = tex2D(_BrushTex, brushUV);
-                    half blendFactor = brushSample.a * mask;
+                    half brushAlpha = tex2D(_BrushTex, brushUV).a;
 
-                    col = lerp(col, _BrushColor, blendFactor);
+                    // Skip blending if alpha is zero
+                    if (brushAlpha <= 0.0h)
+                        continue;
+
+                    col = lerp(col, _BrushColor, brushAlpha);
                 }
 
                 return col;
