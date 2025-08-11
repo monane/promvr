@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using PromVR.Utils;
 
 namespace PromVR.Drawing
 {
@@ -39,7 +38,7 @@ namespace PromVR.Drawing
         {
             foreach (var segment in segments)
             {
-                PointsListPool.Release(segment.Points);
+                DrawingSegmentsPool.Release(segment);
             }
 
             segments.Clear();
@@ -63,11 +62,11 @@ namespace PromVR.Drawing
         /// <returns>Index for created <c>DrawingSegment</c> item</returns>
         public int InitNewSegment(BrushParams brushParams)
         {
-            segments.Add(new DrawingSegment
-            {
-                BrushParams = brushParams,
-                Points = PointsListPool.Get()
-            });
+            var newSegment = DrawingSegmentsPool.Get();
+
+            newSegment.BrushParams = brushParams;
+
+            segments.Add(newSegment);
 
             return segments.Count - 1;
         }
