@@ -55,15 +55,15 @@ namespace PromVR.Utils
         /// <summary>
         /// Type of <c>T</c> must be Serializable
         /// </summary>
-        public static async Awaitable SaveAsync<T>(T data, string fileName, JsonSerializerSettings serializerSettings = null)
+        public static async Awaitable SaveAsync<T>(T data, string fileName)
         {
-            await Awaitable.BackgroundThreadAsync();
-
-            var json = JsonConvert.SerializeObject(data, serializerSettings);
             var filePath = GetFilePath(fileName);
+
+            await Awaitable.BackgroundThreadAsync();
 
             try
             {
+                var json = JsonUtility.ToJson(data);
                 await File.WriteAllTextAsync(filePath, json);
             }
             catch (Exception e)
