@@ -31,7 +31,7 @@
 ---
 Ссылки:
 - [Видео демонстрация](https://disk.yandex.ru/i/Tqvfj71aTl9BAg) - на записи не видно режима **pass-through**, но он включён.
-- [APK-файл](https://disk.yandex.ru/d/kBvbclD3YlOE4Q)
+- [APK-файл](https://disk.yandex.ru/d/3KCHfgaJ8aZSGg)
 
 Тестировалось на устройстве Oculus Quest 2 с версией ОС v78.0
 
