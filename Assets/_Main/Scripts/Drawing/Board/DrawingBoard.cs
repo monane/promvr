@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using PromVR.Drawing.Segments;
 
-namespace PromVR.Drawing
+namespace PromVR.Drawing.Board
 {
     public class DrawingBoard : MonoBehaviour
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PromVR.Drawing
+namespace PromVR.Drawing.Board
 {
     public class ProtectDrawingBoardWhenLoading : MonoBehaviour
     {

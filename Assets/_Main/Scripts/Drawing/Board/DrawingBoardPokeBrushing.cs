@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Oculus.Interaction;
 
-namespace PromVR.Drawing
+namespace PromVR.Drawing.Board
 {
     // This class is responsible for drawing segments on DrawingBoard
     // by processing pointer events of Poke Interaction.

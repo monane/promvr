@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PromVR.Drawing
+namespace PromVR.Drawing.Board
 {
     public class DrawingBoardControlPanel : MonoBehaviour
     {
