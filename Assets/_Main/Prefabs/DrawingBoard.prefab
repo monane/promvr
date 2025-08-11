@@ -388,7 +388,7 @@ MonoBehaviour:
   drawableTextureResolution: {x: 1536, y: 1536}
   brushMaterial: {fileID: 2100000, guid: 87d05a37541716e458bb22ea8efaa024, type: 2}
   brushBatchedMaterial: {fileID: 2100000, guid: b6597a35364610848b4c4155095610dd, type: 2}
-  maxBatchSize: 64
+  maxBatchSize: 32
 --- !u!114 &4398307684084923384
 MonoBehaviour:
   m_ObjectHideFlags: 0

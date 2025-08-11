@@ -9,7 +9,7 @@ namespace PromVR.Drawing
         [SerializeField] private Vector2Int drawableTextureResolution = new(1536, 1536);
         [SerializeField] private Material brushMaterial;
         [SerializeField] private Material brushBatchedMaterial;
-        [SerializeField, Range(64, 256)] private int maxBatchSize = 64;
+        [SerializeField, Range(16, 256)] private int maxBatchSize = 64;
 
         public RenderTexture DrawableTexture { get; private set; }
         private RenderTexture drawableTextureBuffer;
@@ -42,11 +42,11 @@ namespace PromVR.Drawing
 
         private void ApplyBrushParams(BrushParams brushParams)
         {
-            var brushSizeParam = "_BrushSize";
-            var brushColorParam = "_BrushColor";
-
             if (!activeBrushParams.Equals(brushParams))
             {
+                var brushSizeParam = "_BrushSize";
+                var brushColorParam = "_BrushColor";
+
                 brushMaterial.SetFloat(brushSizeParam, brushParams.Radius);
                 brushMaterial.SetColor(brushColorParam, brushParams.Color);
 
