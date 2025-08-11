@@ -13,7 +13,7 @@
 
 Логика:
  - [RenderTextureDrawing.cs](Assets/_Main/Scripts/Drawing/RenderTextureDrawing.cs) - отвечает за рисование на RenderTexture с помощью шейдеров.
- - [DrawingBoard.cs](Assets/_Main/Scripts/Drawing/DrawingBoard.cs) - "Доска для рисования", главный объект отвечающий за [конечную отрисовку DrawingSegment'ов с помощью RenderTextureDrawing](Assets/_Main/Scripts/Drawing/DrawingBoard.cs#L105).
+ - [DrawingBoard.cs](Assets/_Main/Scripts/Drawing/DrawingBoard.cs) - "Доска для рисования", главный объект отвечающий за [конечную отрисовку DrawingSegment'ов с помощью RenderTextureDrawing](Assets/_Main/Scripts/Drawing/DrawingBoard.cs#L104).
  - [DrawingBoardPersistence.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPersistence.cs) - отвечает за сохранение и загрузку состояния для **DrawingBoard**.
  - [DrawingBoardPokeBrushing.cs](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs) - отвечает за отрисовку **DrawingSegment**'ов на **DrawingBoard** [в ответ на ввод пальцами](Assets/_Main/Scripts/Drawing/DrawingBoardPokeBrushing.cs#L78C9-L105C10).
  - [DrawingBoardControlPanel.cs](Assets/_Main/Scripts/Drawing/DrawingBoardControlPanel.cs) - "Панель управления для доски рисования", здесь все кнопки и связанные с ними эвенты.
